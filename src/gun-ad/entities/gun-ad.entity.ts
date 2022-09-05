@@ -1,9 +1,11 @@
+import { Report } from '../../report/entities/report.entity';
 import {
   Column,
   Entity,
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Category } from '../../category/entities/category.entity';
@@ -35,11 +37,15 @@ export class GunAd {
   @Column({ type: 'text', nullable: false })
   public address: string;
 
+  //jedan oglas vise reportova
+  @OneToMany(()=> Report, (report: Report) => report.gunAd)
+  public reports: Report[];
+
   //vise oglasa jedan korisnik (pripadaju samo njemu)
   @ManyToOne(() => User, (user: User) => user.myAds)
   public createdBy: User;
 
-  //vise oglasa jedna kateogirja 
+  //vise oglasa jedna kategorija 
   @ManyToOne(() => Category, (category: Category) => category.GunAds)
   public category: Category;
 

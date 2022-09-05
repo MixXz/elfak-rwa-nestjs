@@ -5,7 +5,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { ProfileType } from '../../enums/profileType.enum';
+import { Role } from '../../enums/role.enum';
 import { GunAd } from '../../gun-ad/entities/gun-ad.entity';
 
 @Entity()
@@ -28,7 +28,7 @@ export class User {
   @Column({ type: 'text', nullable: false })
   public phone: string;
 
-  @Column({ type: 'text', nullable: false, default: ProfileType.USER })
+  @Column({ type: 'text', nullable: false, default: Role.USER })
   public type: string;
 
   //jedan korinsik moze da kreira/ima vise oglasa
