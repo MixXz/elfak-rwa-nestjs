@@ -14,8 +14,6 @@ import { AuthService } from '../auth/auth.service';
 import { UserDto } from './dto/user.dto';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { Roles } from '../auth/roles.decorator';
-import { Role } from '../enums/role.enum';
 
 @Controller('users')
 export class UserController {
