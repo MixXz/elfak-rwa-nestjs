@@ -1,4 +1,4 @@
 export enum ReportStatus {
-    RESOLVED = 'RESOLVED',
-    PENDING = 'PENDING',
+    Resolved = 'resolved',
+    Pending = 'pending',
   }

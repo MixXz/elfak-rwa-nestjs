@@ -28,8 +28,8 @@ export class User {
   @Column({ type: 'text', nullable: false })
   public phone: string;
 
-  @Column({ type: 'text', nullable: false, default: Role.USER })
-  public type: string;
+  @Column({ type: 'text', nullable: false, default: Role.User })
+  public role: string;
 
   //jedan korinsik moze da kreira/ima vise oglasa
   @OneToMany(() => GunAd, (ad: GunAd) => ad.createdBy)

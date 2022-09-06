@@ -7,7 +7,7 @@ export class Report {
   @PrimaryGeneratedColumn()
   public id: number;
 
-  @Column({ type: 'text', default: ReportStatus.PENDING })
+  @Column({ type: 'text', default: ReportStatus.Pending })
   public status: ReportStatus;
 
   //vise reportova za jedan oglas
