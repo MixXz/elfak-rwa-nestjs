@@ -24,7 +24,7 @@ export class GunAdService {
     const gunAd = this.gunAdRepository.create(gunAdDto);
 
     let paths: string[] = [];
-    images.forEach((img) => paths.push(img.path));
+    images.forEach((img) => paths.push(img.filename));
 
     const category: Category | null = await this.categoryRepository.findOneBy({
       id: gunAdDto.categoryID,
@@ -36,11 +36,24 @@ export class GunAdService {
     gunAd.createdBy = user;
     gunAd.category = category;
 
+    console.log(images);
     return this.gunAdRepository.save(gunAd);
   }
 
-  public getAll() {
-    return this.gunAdRepository.find();
+  public async getAll() {
+    const arr: GunAd[] = await this.gunAdRepository.find();
+
+    arr.map((el) => {
+      let a: string = <string>(<unknown>el.gallery);
+      a = a.slice(2);
+      a = a.slice(0, -2);
+      const arr = a.split('","');
+
+      el.gallery = arr;
+
+      return el;
+    });
+    return arr;
   }
 
   public async delete(id: number) {

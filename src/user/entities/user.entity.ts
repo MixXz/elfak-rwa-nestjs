@@ -28,6 +28,9 @@ export class User {
   @Column({ type: 'text', nullable: false })
   public phone: string;
 
+  @Column({ type: 'text', nullable: true })
+  public address: string;
+
   @Column({ type: 'text', nullable: false, default: Role.User })
   public role: string;
 

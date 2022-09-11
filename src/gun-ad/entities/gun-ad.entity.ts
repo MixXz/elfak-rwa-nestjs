@@ -31,11 +31,8 @@ export class GunAd {
   @Column({ type: 'text', nullable: false })
   public price: number;
 
-  @Column({ type: 'text', nullable: true  })
+  @Column({ type: 'text', nullable: true})
   public gallery: string[];
-
-  @Column({ type: 'text', nullable: false })
-  public address: string;
 
   //jedan oglas vise reportova
   @OneToMany(()=> Report, (report: Report) => report.gunAd)

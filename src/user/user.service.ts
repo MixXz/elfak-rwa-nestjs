@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserDto } from './dto/user.dto';
@@ -12,15 +12,15 @@ export class UserService {
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
-  async create(userDto: UserDto): Promise<User | undefined> {
-    const { email, password } = userDto;
+  async create(userDto): Promise<User | undefined> {
+    const {email, password} = userDto;
 
     if (!email || !password) {
-      throw new Error('MissingFields');
+      throw new BadRequestException('MissingFields');
     }
 
     if (await this.findOne(email)) {
-      throw new Error('EmailAlreadyRegistered');
+      throw new BadRequestException('EmailAlreadyRegistered');
     }
 
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
@@ -29,6 +29,7 @@ export class UserService {
     user.firstName = userDto.firstName;
     user.lastName = userDto.lastName;
     user.phone = userDto.phone;
+    user.address = userDto.address;
     user.email = email;
     user.password = hashedPassword;
     user.favourites = [];
