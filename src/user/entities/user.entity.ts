@@ -31,6 +31,9 @@ export class User {
   @Column({ type: 'text', nullable: true })
   public address: string;
 
+  @Column({ type: 'text', nullable: true })
+  public imagePath: string;
+
   @Column({ type: 'text', nullable: false, default: Role.User })
   public role: string;
 
@@ -41,6 +44,4 @@ export class User {
   // vise korinsika mogu imati više oglasa kao favorite
   @ManyToMany(() => GunAd, (ad: GunAd) => ad.users, { onDelete: 'CASCADE' })
   public favourites: GunAd[];
-
-  
 }

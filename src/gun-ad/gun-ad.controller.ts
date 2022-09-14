@@ -61,6 +61,18 @@ export class GunAdController {
     return this.gunAdService.getAll();
   }
 
+  @Get(':id')
+  public getSingle(@Param('id', ParseIntPipe) id: number) {
+    return this.gunAdService.getSingle(id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Get('myAds')
+  @Roles(Role.User, Role.Admin)
+  public getByUser(@Request() req){
+    return this.gunAdService.getByUser(req.user.id);
+  }
+
   @Delete(':id')
   public delete(@Param('id', ParseIntPipe) id: number) {
     return this.gunAdService.delete(id);

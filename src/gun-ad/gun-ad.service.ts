@@ -24,10 +24,14 @@ export class GunAdService {
     const gunAd = this.gunAdRepository.create(gunAdDto);
 
     let paths: string[] = [];
-    images.forEach((img) => paths.push(img.filename));
+    if (images) {
+      images.forEach((img) => paths.push(img.filename));
+    } else {
+      paths = null;
+    }
 
     const category: Category | null = await this.categoryRepository.findOneBy({
-      id: gunAdDto.categoryID,
+      id: gunAdDto.categoryId,
     });
 
     if (!category) throw new BadRequestException('InvalidCategory');
@@ -36,12 +40,11 @@ export class GunAdService {
     gunAd.createdBy = user;
     gunAd.category = category;
 
-    console.log(images);
     return this.gunAdRepository.save(gunAd);
   }
 
   public async getAll() {
-    const arr: GunAd[] = await this.gunAdRepository.find();
+    const arr: GunAd[] = await this.gunAdRepository.find({relations: { createdBy: true, category: true }});
 
     arr.map((el) => {
       let a: string = <string>(<unknown>el.gallery);
@@ -54,6 +57,19 @@ export class GunAdService {
       return el;
     });
     return arr;
+  }
+
+  public getSingle(id: number) {
+    return this.gunAdRepository.findOne({
+      where: {
+        id: id,
+      },
+      relations: { createdBy: true, category: true },
+    });
+  }
+
+  public getByUser(user: User){
+    return;
   }
 
   public async delete(id: number) {

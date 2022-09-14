@@ -5,5 +5,8 @@ export class GunAdDto {
   caliber: string;
   price: number;
   gallery: string[];
-  categoryID: number;
+  categoryId: number;
+  createdById: number;
+  reports: [];
+  
 }
