@@ -56,9 +56,12 @@ export class GunAdController {
     return this.gunAdService.create(dto, images, req.user);
   }
 
-  @Get()
-  public get() {
-    return this.gunAdService.getAll();
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Get('myAds')
+  @Roles(Role.User, Role.Admin)
+  public getByUser(@Request() req) {
+    console.log('uso sam ovde');
+    return this.gunAdService.getByUser(req.user.id);
   }
 
   @Get(':id')
@@ -66,15 +69,15 @@ export class GunAdController {
     return this.gunAdService.getSingle(id);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Get('myAds')
-  @Roles(Role.User, Role.Admin)
-  public getByUser(@Request() req){
-    return this.gunAdService.getByUser(req.user.id);
+  @Get()
+  public get() {
+    return this.gunAdService.getAll();
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Delete(':id')
-  public delete(@Param('id', ParseIntPipe) id: number) {
-    return this.gunAdService.delete(id);
+  @Roles(Role.User, Role.Admin)
+  public delete(@Param('id', ParseIntPipe) id: number, @Request() req) {
+    return this.gunAdService.delete(id, req.user.id);
   }
 }

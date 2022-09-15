@@ -10,6 +10,7 @@ import { Category } from '../category/entities/category.entity';
 export class GunAdService {
   constructor(
     @InjectRepository(GunAd) private gunAdRepository: Repository<GunAd>,
+    @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
   ) {}
@@ -44,7 +45,9 @@ export class GunAdService {
   }
 
   public async getAll() {
-    const arr: GunAd[] = await this.gunAdRepository.find({relations: { createdBy: true, category: true }});
+    const arr: GunAd[] = await this.gunAdRepository.find({
+      relations: { createdBy: true, category: true },
+    });
 
     arr.map((el) => {
       let a: string = <string>(<unknown>el.gallery);
@@ -56,6 +59,7 @@ export class GunAdService {
 
       return el;
     });
+
     return arr;
   }
 
@@ -68,11 +72,57 @@ export class GunAdService {
     });
   }
 
-  public getByUser(user: User){
-    return;
+  public async getByUser(id: number) {
+    const user: User | null = await this.userRepository.findOne({
+      where: { id: id },
+      relations: { myAds: true },
+    });
+
+    if (!user) throw new BadRequestException('InvalidUser');
+    console.log(user);
+    console.log(user.myAds);
+
+    user.myAds.map((el) => {
+      let a: string = <string>(<unknown>el.gallery);
+      a = a.slice(2);
+      a = a.slice(0, -2);
+      const arr = a.split('","');
+
+      el.gallery = arr;
+
+      return el;
+    });
+
+    const data = user.myAds.map((ad: GunAd) => {
+      return {
+        ...ad,
+        createdBy: {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          phone: user.phone,
+          role: user.role,
+          imagePath: user.imagePath,
+          address: user.address,
+        },
+      };
+    });
+
+    return data;
   }
 
-  public async delete(id: number) {
-    return await this.gunAdRepository.delete(id);
+  public async delete(id: number, userId: number) {
+    const ad: GunAd = await this.gunAdRepository.findOne({
+      where: { id: id },
+      relations: { createdBy: true },
+    });
+
+    if(ad.createdBy.id !== userId) {
+      throw new BadRequestException('InvalidUser');
+    }
+
+    if (!(await this.gunAdRepository.delete(id))) return { success: false };
+
+    return { success: true };
   }
 }
