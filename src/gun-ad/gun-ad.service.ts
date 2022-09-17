@@ -7,6 +7,8 @@ import { User } from '../user/entities/user.entity';
 import { Category } from '../category/entities/category.entity';
 import { GunAdDtoUpdate } from './dto/gun-ad-update.dto';
 import { GunAdDtoSearch } from './dto/gun-ad-search.dto';
+import { Role } from '../enums/role.enum';
+import { GunAdDtoPatch } from './dto/gun-ad-patch.dto';
 
 @Injectable()
 export class GunAdService {
@@ -90,19 +92,13 @@ export class GunAdService {
   public async getBySearch(dto: GunAdDtoSearch) {
     const { searchInput, categoryId } = dto;
 
-    let ads: GunAd[];
+    let ads: GunAd[] = await this.gunAdRepository.find({
+      where: { deleted: false },
+      relations: { createdBy: true, category: true },
+    });
 
     if (categoryId) {
-      ads = await this.gunAdRepository.find({
-        relations: ['category'],
-        where: {
-          category: {
-            id: categoryId,
-          },
-        },
-      });
-    } else {
-      ads = await this.gunAdRepository.find();
+      ads = ads.filter((ad: GunAd) => ad.category.id == categoryId);
     }
 
     if (searchInput.length > 0) {
@@ -119,6 +115,7 @@ export class GunAdService {
 
   public async getAll() {
     const ads: GunAd[] = await this.gunAdRepository.find({
+      where: { deleted: false },
       relations: { createdBy: true, category: true },
     });
 
@@ -163,18 +160,19 @@ export class GunAdService {
     if (!user) throw new BadRequestException('InvalidUser');
 
     const data = user.myAds.map((ad: GunAd) => {
-      return {
-        ...ad,
-        createdBy: {
-          id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          phone: user.phone,
-          role: user.role,
-          imagePath: user.imagePath,
-          address: user.address,
-        },
-      };
+      if (!ad.deleted)
+        return {
+          ...ad,
+          createdBy: {
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            phone: user.phone,
+            role: user.role,
+            imagePath: user.imagePath,
+            address: user.address,
+          },
+        };
     });
 
     return data;
@@ -189,21 +187,43 @@ export class GunAdService {
     });
 
     const data = user.favourites.map((ad: GunAd) => {
-      return {
-        ...ad,
-        createdBy: {
-          id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          phone: user.phone,
-          role: user.role,
-          imagePath: user.imagePath,
-          address: user.address,
-        },
-      };
+      if (!ad.deleted)
+        return {
+          ...ad,
+          createdBy: {
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            phone: user.phone,
+            role: user.role,
+            imagePath: user.imagePath,
+            address: user.address,
+          },
+        };
     });
 
     return data;
+  }
+
+  public async softDelete(dto: GunAdDtoPatch, userId: number) {
+    const { id } = dto;
+    const user: User = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user || user.role !== Role.Admin)
+      throw new BadRequestException('Forbidden');
+
+    const ad: GunAd = await this.gunAdRepository.findOne({ where: { id: id } });
+
+    if (!ad) throw new BadRequestException('AdNotFound');
+
+    ad.deleted = true;
+
+    if (!(await this.gunAdRepository.update(ad.id, ad)))
+      return { success: false };
+
+    return { success: true };
   }
 
   public async delete(id: number, userId: number) {

@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Put,
   Query,
@@ -23,6 +24,7 @@ import { Role } from '../enums/role.enum';
 import { FILE_CONF, IMG_COUNT } from '../../helper-config';
 import { GunAdDtoUpdate } from './dto/gun-ad-update.dto';
 import { GunAdDtoSearch } from './dto/gun-ad-search.dto';
+import { GunAdDtoPatch } from './dto/gun-ad-patch.dto';
 
 @Controller('gun-ad')
 export class GunAdController {
@@ -68,7 +70,6 @@ export class GunAdController {
 
   @Get('search')
   public search(@Query() dto: GunAdDtoSearch) {
-    if(dto) console.log(dto);
     return this.gunAdService.getBySearch(dto);
   }
 
@@ -79,11 +80,16 @@ export class GunAdController {
     return this.gunAdService.getSingle(id, req.user);
   }
 
-
-
   @Get()
   public get() {
     return this.gunAdService.getAll();
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Patch('softDelete')
+  @Roles(Role.Admin)
+  public softDelete(@Body() dto: GunAdDtoPatch, @Request() req) {
+    return this.gunAdService.softDelete(dto, req.user.id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
