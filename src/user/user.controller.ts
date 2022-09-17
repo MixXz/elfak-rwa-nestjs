@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -14,6 +15,9 @@ import { AuthService } from '../auth/auth.service';
 import { UserDto } from './dto/user.dto';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
+import { Role } from '../enums/role.enum';
 
 @Controller('users')
 export class UserController {
@@ -37,6 +41,16 @@ export class UserController {
   @Get('profile')
   getProfile(@Request() req) {
     return req.user;
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Get('toggleSave/:id')
+  @Roles(Role.User, Role.Admin)
+  public async toggleSave(
+    @Request() req,
+    @Param('id', ParseIntPipe) adId: number,
+  ) {
+    return this.userService.toggleSave(adId, req.user);
   }
 
   @Get()

@@ -31,7 +31,7 @@ export class GunAd {
   @Column({ type: 'text', nullable: false })
   public price: number;
 
-  @Column({ type: 'text', nullable: true})
+  @Column('simple-array')
   public gallery: string[];
 
   //jedan oglas vise reportova

@@ -1,19 +1,20 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserDto } from './dto/user.dto';
 import { User } from './entities/user.entity';
 import { SALT_ROUNDS } from '../../helper-config';
 import * as bcrypt from 'bcrypt';
+import { GunAd } from '../gun-ad/entities/gun-ad.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(GunAd) private gunAdRepository: Repository<GunAd>,
   ) {}
 
-  async create(userDto): Promise<User | undefined> {
-    const {email, password} = userDto;
+  public async create(userDto): Promise<User | undefined> {
+    const { email, password } = userDto;
 
     if (!email || !password) {
       throw new BadRequestException('MissingFields');
@@ -37,7 +38,34 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
-  async findOne(email: string): Promise<User | undefined> {
+  public async toggleSave(adId: number, accessUser: User) {
+    if (!accessUser) throw new BadRequestException('InvalidUser');
+
+    const user: User = await this.userRepository.findOne({
+      where: { id: accessUser.id },
+      relations: { favourites: true },
+    });
+
+    const isAlreadySaved = user.favourites.find(
+      (favourite) => favourite.id === adId,
+    );
+    let ad: GunAd;
+    if (!isAlreadySaved) {
+      ad = await this.gunAdRepository.findOne({
+        where: { id: adId },
+      });
+    }
+
+    user.favourites = isAlreadySaved
+      ? user.favourites.filter((favourite) => favourite.id !== adId)
+      : [...user.favourites, ad];
+
+    if (!(await this.userRepository.save(user))) return { success: false };
+
+    return { success: true };
+  }
+
+  public async findOne(email: string): Promise<User | undefined> {
     return this.userRepository.findOneBy({ email: email });
   }
 

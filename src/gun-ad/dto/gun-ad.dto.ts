@@ -8,5 +8,4 @@ export class GunAdDto {
   categoryId: number;
   createdById: number;
   reports: [];
-  
 }
