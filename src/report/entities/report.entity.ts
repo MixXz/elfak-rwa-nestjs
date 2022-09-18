@@ -10,6 +10,9 @@ export class Report {
   @Column({ type: 'text', default: ReportStatus.Pending })
   public status: ReportStatus;
 
+  @Column({type: 'text', nullable: true})
+  public text: string;
+
   //vise reportova za jedan oglas
   @ManyToOne(() => GunAd, (ad: GunAd) => ad.reports)
   public gunAd: GunAd;
