@@ -9,12 +9,15 @@ import { GunAdDtoUpdate } from './dto/gun-ad-update.dto';
 import { GunAdDtoSearch } from './dto/gun-ad-search.dto';
 import { Role } from '../enums/role.enum';
 import { GunAdDtoPatch } from './dto/gun-ad-patch.dto';
+import { Report } from '../report/entities/report.entity';
+import { ReportStatus } from '../enums/report-status.enum';
 
 @Injectable()
 export class GunAdService {
   constructor(
     @InjectRepository(GunAd) private gunAdRepository: Repository<GunAd>,
     @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(Report) private reportRepository: Repository<Report>,
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
   ) {}
@@ -214,14 +217,22 @@ export class GunAdService {
     if (!user || user.role !== Role.Admin)
       throw new BadRequestException('Forbidden');
 
-    const ad: GunAd = await this.gunAdRepository.findOne({ where: { id: id } });
+    const ad: GunAd = await this.gunAdRepository.findOne({
+      where: { id: id },
+      relations: { reports: true },
+    });
 
     if (!ad) throw new BadRequestException('AdNotFound');
 
+    ad.reports.forEach(async (report: Report) => {
+      await this.reportRepository.update(report.id, {
+        status: ReportStatus.Resolved,
+      });
+    });
+
     ad.deleted = true;
 
-    if (!(await this.gunAdRepository.update(ad.id, ad)))
-      return { success: false };
+    if (!(await this.gunAdRepository.save(ad))) return { success: false };
 
     return { success: true };
   }
@@ -229,12 +240,15 @@ export class GunAdService {
   public async delete(id: number, userId: number) {
     const ad: GunAd = await this.gunAdRepository.findOne({
       where: { id: id },
-      relations: { createdBy: true },
+      relations: { createdBy: true, reports: true },
     });
 
     if (ad.createdBy.id !== userId) {
       throw new BadRequestException('InvalidUser');
     }
+    ad.reports.forEach(
+      async (report: Report) => await this.reportRepository.delete(report.id),
+    );
 
     if (!(await this.gunAdRepository.delete(id))) return { success: false };
 

@@ -52,7 +52,7 @@ export class ReportService {
 
   public getAll() {
     return this.reportRepository.find({
-      where: { status: ReportStatus.Pending },
+      where: { status: ReportStatus.Pending},
       relations: { gunAd: true },
     });
   }
