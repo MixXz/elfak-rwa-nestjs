@@ -7,8 +7,11 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Request,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { LocalAuthGuard } from '../auth/local-auth.guard';
 import { AuthService } from '../auth/auth.service';
@@ -18,6 +21,9 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { Role } from '../enums/role.enum';
+import { UserUpdateDto } from './dto/user-update.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FILE_CONF } from '../../helper-config';
 
 @Controller('users')
 export class UserController {
@@ -37,9 +43,21 @@ export class UserController {
     return this.authService.login(req.user);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Put('edit-profile')
+  @Roles(Role.User, Role.Admin)
+  @UseInterceptors(FileInterceptor('image', FILE_CONF))
+  public edit(
+    @Request() req,
+    @Body() dto: UserUpdateDto,
+    @UploadedFile() image: Express.Multer.File,
+  ) {
+    return this.userService.editProfile(req.user, dto, image);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Request() req) {
+  public getProfile(@Request() req) {
     return req.user;
   }
 

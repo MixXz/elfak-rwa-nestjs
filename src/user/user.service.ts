@@ -3,8 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { SALT_ROUNDS } from '../../helper-config';
-import * as bcrypt from 'bcrypt';
 import { GunAd } from '../gun-ad/entities/gun-ad.entity';
+import { UserUpdateDto } from './dto/user-update.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -36,6 +37,44 @@ export class UserService {
     user.favourites = [];
 
     return this.userRepository.save(user);
+  }
+
+  public async editProfile(
+    accessUser: User,
+    dto: UserUpdateDto,
+    image: Express.Multer.File,
+  ) {
+    const { firstName, lastName, address, phone } = dto;
+
+    const user: User = await this.userRepository.findOne({
+      where: { id: accessUser.id },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        address: true,
+        phone: true,
+        role: true,
+        imagePath: true,
+      },
+    });
+    console.log(user);
+
+    if (!user) throw new BadRequestException('InvalidUser');
+
+    user.firstName = firstName;
+    user.lastName = lastName;
+    user.address = address;
+    user.phone = phone;
+
+    if (image) {
+      user.imagePath = image.filename;
+    }
+
+    if (!(await this.userRepository.update(user.id, user)))
+      return { success: false };
+
+    return user;
   }
 
   public async toggleSave(adId: number, accessUser: User) {
