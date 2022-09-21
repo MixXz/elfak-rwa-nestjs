@@ -11,6 +11,7 @@ import { Role } from '../enums/role.enum';
 import { GunAdDtoPatch } from './dto/gun-ad-patch.dto';
 import { Report } from '../report/entities/report.entity';
 import { ReportStatus } from '../enums/report-status.enum';
+import { UPLOAD_DESTINATION } from '../../helper-config';
 
 @Injectable()
 export class GunAdService {
@@ -81,6 +82,11 @@ export class GunAdService {
     let imgs: string[] = [];
     if (images.length !== 0) {
       images.forEach((img) => imgs.push(img.filename));
+
+      const fs = require('fs');
+      ad.gallery.forEach(img => {
+        fs.unlinkSync(`${UPLOAD_DESTINATION}/${img}`);
+      })
     } else {
       imgs = dto.gallery;
     }
@@ -246,9 +252,17 @@ export class GunAdService {
     if (ad.createdBy.id !== userId) {
       throw new BadRequestException('InvalidUser');
     }
-    ad.reports.forEach(
-      async (report: Report) => await this.reportRepository.delete(report.id),
-    );
+
+    if (ad.gallery.length > 0) {
+      const { gallery } = ad;
+
+      const fs = require('fs');
+
+      gallery.forEach((img) => {
+        const path: string = `${UPLOAD_DESTINATION}/${img}`;
+        fs.unlinkSync(path);
+      });
+    }
 
     if (!(await this.gunAdRepository.delete(id))) return { success: false };
 

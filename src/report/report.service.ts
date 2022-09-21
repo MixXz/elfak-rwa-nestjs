@@ -32,16 +32,6 @@ export class ReportService {
     return this.reportRepository.save(report);
   }
 
-  // public async update(id: number) {
-  //   const report: Report = await this.reportRepository.findOne({where: {id: id}});
-
-  //   if(!report) throw new BadRequestException('ReportNotFound');
-
-  //   report.status = ReportStatus.Resolved;
-
-  //   return this.reportRepository.update(report.id, report);
-  // }
-
   public async delete(id: number){
     const report: Report = await this.reportRepository.findOne({where: {id: id}});
 

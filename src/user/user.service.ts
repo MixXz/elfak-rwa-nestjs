@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { SALT_ROUNDS } from '../../helper-config';
+import { SALT_ROUNDS, UPLOAD_DESTINATION } from '../../helper-config';
 import { GunAd } from '../gun-ad/entities/gun-ad.entity';
 import { UserUpdateDto } from './dto/user-update.dto';
 import * as bcrypt from 'bcrypt';
@@ -58,7 +58,6 @@ export class UserService {
         imagePath: true,
       },
     });
-    console.log(user);
 
     if (!user) throw new BadRequestException('InvalidUser');
 
@@ -68,6 +67,13 @@ export class UserService {
     user.phone = phone;
 
     if (image) {
+      const { imagePath } = user;
+      const fs = require('fs');
+
+      if (imagePath) {
+        fs.unlinkSync(`${UPLOAD_DESTINATION}/${imagePath}`);
+      }
+
       user.imagePath = image.filename;
     }
 
