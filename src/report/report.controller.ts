@@ -10,14 +10,12 @@ import { ReportService } from './report.service';
 export class ReportController {
   constructor(private readonly reportService: ReportService) {}
 
-
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Post()
   @Roles(Role.User, Role.Admin)
   public create(@Body() dto: ReportDto) {
     return this.reportService.create(dto);
   }
-
   
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Delete(':id')
@@ -25,13 +23,6 @@ export class ReportController {
   public delete(@Param('id', ParseIntPipe) id: number) {
     return this.reportService.delete(id);
   }
-
-  // @UseGuards(JwtAuthGuard, RolesGuard)
-  // @Patch()
-  // @Roles(Role.Admin)
-  // public resolve(@Body() id: number) {
-  //   return this.reportService.update();
-  // }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Get()

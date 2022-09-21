@@ -37,19 +37,17 @@ export class GunAd {
   @Column('simple-array')
   public gallery: string[];
 
-  //jedan oglas vise reportova
   @OneToMany(() => Report, (report: Report) => report.gunAd)
   public reports: Report[];
 
-  //vise oglasa jedan korisnik (pripadaju samo njemu)
-  @ManyToOne(() => User, (user: User) => user.myAds)
+  @ManyToOne(() => User, (user: User) => user.myAds, { onDelete: 'CASCADE' })
   public createdBy: User;
 
-  //vise oglasa jedna kategorija
-  @ManyToOne(() => Category, (category: Category) => category.GunAds)
+  @ManyToOne(() => Category, (category: Category) => category.GunAds, {
+    onDelete: 'CASCADE',
+  })
   public category: Category;
 
-  // vise oglasa mogu imati vise korisnika
   @ManyToMany(() => User, (user: User) => user.favourites)
   @JoinTable({ name: 'adFavourites' })
   public users: User[];

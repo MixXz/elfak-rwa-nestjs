@@ -9,7 +9,6 @@ export class Category {
   @Column({ type: 'text', nullable: false })
   public name: string;
 
-  //jedna kategorija vise oglasa
   @OneToMany(() => GunAd, (ad: GunAd) => ad.category)
   public GunAds: GunAd[];
 }

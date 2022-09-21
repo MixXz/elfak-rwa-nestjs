@@ -13,7 +13,6 @@ export class Report {
   @Column({ type: 'text', nullable: true })
   public text: string;
 
-  //vise reportova za jedan oglas
   @ManyToOne(() => GunAd, (ad: GunAd) => ad.reports, { onDelete: 'CASCADE' })
   public gunAd: GunAd;
 }

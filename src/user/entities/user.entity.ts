@@ -37,11 +37,9 @@ export class User {
   @Column({ type: 'text', nullable: false, default: Role.User })
   public role: string;
 
-  //jedan korinsik moze da kreira/ima vise oglasa
   @OneToMany(() => GunAd, (ad: GunAd) => ad.createdBy)
   public myAds: GunAd[];
 
-  // vise korinsika mogu imati više oglasa kao favorite
   @ManyToMany(() => GunAd, (ad: GunAd) => ad.users, { onDelete: 'CASCADE' })
   public favourites: GunAd[];
 }

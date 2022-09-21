@@ -1,3 +1,8 @@
 export class CategoryDto {
-    name: string;
-  }
+  name: string;
+}
+
+export class CategoryUpdateDto {
+  id: number;
+  name: string;
+}
