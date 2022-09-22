@@ -11,7 +11,7 @@ export class CategoryService {
     private categoryRepository: Repository<Category>,
   ) {}
 
-  async create(dto: CategoryDto) {
+  async create(dto: CategoryDto): Promise<Category> {
     const { name } = dto;
     if (!name || name.length === 0)
       throw new BadRequestException('InvalidCategoryName');

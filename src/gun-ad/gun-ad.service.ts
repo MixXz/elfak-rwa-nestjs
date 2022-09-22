@@ -27,7 +27,7 @@ export class GunAdService {
     gunAdDto: GunAdDto,
     images: Array<Express.Multer.File>,
     user: User,
-  ) {
+  ): Promise<GunAd> {
     if (!user) throw new BadRequestException('InvalidUser');
 
     const gunAd = this.gunAdRepository.create(gunAdDto);
@@ -56,7 +56,7 @@ export class GunAdService {
     dto: GunAdDtoUpdate,
     images: Array<Express.Multer.File>,
     user: User,
-  ) {
+  ): Promise<GunAd> {
     if (!user) throw new BadRequestException('InvalidUser');
 
     const ad: GunAd = await this.gunAdRepository.findOne({
@@ -84,9 +84,9 @@ export class GunAdService {
       images.forEach((img) => imgs.push(img.filename));
 
       const fs = require('fs');
-      ad.gallery.forEach(img => {
+      ad.gallery.forEach((img) => {
         fs.unlinkSync(`${UPLOAD_DESTINATION}/${img}`);
-      })
+      });
     } else {
       imgs = dto.gallery;
     }
@@ -98,7 +98,7 @@ export class GunAdService {
     return ad;
   }
 
-  public async getBySearch(dto: GunAdDtoSearch) {
+  public async getBySearch(dto: GunAdDtoSearch): Promise<GunAd[]> {
     const { searchInput, categoryId } = dto;
 
     let ads: GunAd[] = await this.gunAdRepository.find({
@@ -122,7 +122,7 @@ export class GunAdService {
     return ads;
   }
 
-  public async getAll() {
+  public async getAll(): Promise<GunAd[]> {
     const ads: GunAd[] = await this.gunAdRepository.find({
       where: { deleted: false },
       relations: { createdBy: true, category: true },
